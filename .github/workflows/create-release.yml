@@ -1,0 +1,28 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: 'Release name. Example: v1.0.0'
+        required: true
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Create tag
+      run: |
+        git tag ${{ github.event.inputs.release_name }}
+        git push -f origin ${{ github.event.inputs.release_name }}
+    - name: Create GitHub release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.event.inputs.release_name }}
+        release_name: ${{ github.event.inputs.release_name }}
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
