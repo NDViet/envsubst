@@ -37,8 +37,14 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git tag -a "${{ inputs.tag_name }}" -m "Release ${{ inputs.tag_name }}"
-        git push origin "${{ inputs.tag_name }}"
+
+        # Check if tag already exists
+        if git rev-parse "${{ inputs.tag_name }}" >/dev/null 2>&1; then
+          echo "Tag ${{ inputs.tag_name }} already exists, skipping tag creation"
+        else
+          git tag -a "${{ inputs.tag_name }}" -m "Release ${{ inputs.tag_name }}"
+          git push origin "${{ inputs.tag_name }}"
+        fi
 
     - name: Create Release
       id: create_release
@@ -51,6 +57,7 @@ jobs:
         body: ${{ inputs.release_body }}
         draft: false
         prerelease: false
+      continue-on-error: true
 
     - name: Release binaries
       uses: actions/github-script@v7
