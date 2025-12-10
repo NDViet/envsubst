@@ -94,6 +94,70 @@ func main() {
 
 * `os.ExpandEnv(s string) string` - only supports `$var` and `${var}` notations
 
+#### Creating Releases
+
+This project uses automated workflows to create releases with prebuilt binaries for multiple platforms.
+
+##### Release Workflows
+
+**`create-release.yml`**: Creates git tags and GitHub releases
+- **Trigger**: Manual via GitHub Actions UI
+- **Inputs**: Tag name, optional release title and description
+- **Features**: 
+  - Creates git tag (skips if already exists)
+  - Creates GitHub release
+  - Handles existing tags gracefully (rerunnable)
+
+**`binaries.yml`**: Builds and uploads binaries
+- **Triggers**: 
+  - Automatically on release creation
+  - Manual dispatch with optional tag name
+- **Platforms**: Linux (amd64, arm64), macOS (amd64, arm64), Windows (amd64)
+- **Features**: Builds from specific tag or latest release
+
+##### Release Procedure
+
+1. Go to the **Actions** tab in the GitHub repository
+2. Select the **"Create Release"** workflow
+3. Click **"Run workflow"**
+4. Enter the tag name following semantic versioning (e.g., `v1.4.5`)
+5. Optionally provide a release title and description
+6. Click **"Run workflow"**
+7. Wait for the workflow to complete successfully
+8. Go back to the **Actions** tab and select the **"Release Binaries"** workflow
+9. Click **"Run workflow"** to build and upload binaries for the new release
+10. Enter the same tag name in step (4) (or select `Use workflow from` released tag)
+11. Click **"Run workflow"**
+
+##### What Happens During Release
+
+1. **Tag Creation**: Creates a git tag with the specified version
+2. **Release Creation**: Creates a GitHub release with optional title/description
+3. **Binary Building**: Automatically triggers binary builds for all platforms:
+   - `envsubst-Linux-x86_64` (Linux AMD64)
+   - `envsubst-Linux-arm64` (Linux ARM64)
+   - `envsubst-Darwin-x86_64` (macOS Intel)
+   - `envsubst-Darwin-arm64` (macOS Apple Silicon)
+   - `envsubst` (Windows AMD64)
+4. **Asset Upload**: Binaries are automatically attached to the release
+
+##### Rerunning Releases
+
+- **Same Tag**: Both workflows can be rerun with the same tag name
+- **Tag Exists**: The create-release workflow will skip tag creation if it already exists
+- **Release Exists**: The workflow continues even if the release already exists
+- **Binary Rebuild**: Use the binaries workflow to rebuild assets for existing releases
+
+##### Supported Platforms
+
+| Platform | Architecture  | Binary Name              |
+|----------|---------------|--------------------------|
+| Linux    | AMD64         | `envsubst-Linux-x86_64`  |
+| Linux    | ARM64         | `envsubst-Linux-arm64`   |
+| macOS    | Intel         | `envsubst-Darwin-x86_64` |
+| macOS    | Apple Silicon | `envsubst-Darwin-arm64`  |
+| Windows  | AMD64         | `envsubst`               |
+
 #### License
 MIT
 
