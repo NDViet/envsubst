@@ -1,3 +1,3 @@
 module github.com/a8m/envsubst
 
-go 1.26.1
+go 1.26.2
